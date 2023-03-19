@@ -9,33 +9,42 @@ def WifiConnect():
     wlan = network.WLAN(network.STA_IF)
     # activate network card
     wlan.active(True)
-
-    for i in SECRETS.WIFI:
-        #print(i[0])
-        wlan.connect(i[0],i[1])
-        print("Attempting to connect to",i[0])
     
-        # counter to allow connection attempt to give up if its taking too long
-        j = 0
+    if wlan.isconnected() == True:
+        print("already connected")
+        # probably want to find the name for consistent output, but first value will return True anyway but network name won't be included
+        return([wlan.isconnected()])
+    else:
+        for i in SECRETS.WIFI:
+            #print(i[0])
+            wlan.connect(i[0],i[1])
+            print("Attempting to connect to",i[0])
     
-        while wlan.isconnected() == False:
-            # go into a loop whilst it isn't connected and give an update to term
-            print(j,": connecting to ", i[0])
+            # counter to allow connection attempt to give up if its taking too long
+            j = 0
+    
+            while wlan.isconnected() == False:
+                # go into a loop whilst it isn't connected and give an update to term
+                print(j,": connecting to ", i[0])
         
-            # sleep for 1 second
-            sleep(1)
+                # sleep for 1 second
+                sleep(1)
         
-            # increment counter
-            j = j +1
+                # increment counter
+                j = j +1
         
-            # break out if too many attempts
-            if j > 10:
-                print("failed to connect to", i[0])
-                break
+                # break out if too many attempts
+                if j > 10:
+                    print("failed to connect to", i[0])
+                    break
         
-        if wlan.isconnected():
-            print("connected to",i[0])
-            return([wlan.isconnected(),i[0]])
+            if wlan.isconnected():
+                print("connected to",i[0])
+                return([wlan.isconnected(),i[0]])
     
     return([wlan.isconnected()])
 #print(wlan.ifconfig())
+
+def WifiDisconnect():
+    print("disconnecting")
+    network.WLAN(network.STA_IF).deinit

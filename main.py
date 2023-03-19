@@ -1,11 +1,19 @@
-import ntptime
-import Wifi # custom script to connect to the wifi
-import bme280
+# import standard libs
 from machine import Pin, I2C
 import time
-from Seg import disp, update_disp
-from ds3231 import DS3231
 import _thread
+
+
+# import added libs
+import bme280
+#from bme280_float import *
+from ds3231 import DS3231
+
+
+# import custom scripts
+from Seg import disp, update_disp
+import Ntp_time
+import Wifi # custom script to connect to the wifi
 
 # blank display as random display shown on boot
 for i in range(0,16):
@@ -17,6 +25,7 @@ disp(16,1)
 disp(15,3)
 disp(14,4)
 update_disp()
+
 
 # display "i2c  "
 disp(15,8)
@@ -67,49 +76,6 @@ rtc.datetime(ds.datetime())
 t = time.localtime()
 
 
-# display "net   "
-disp(16,8)
-disp(20,9)
-disp(14,10)
-disp(12,11)
-disp(12,12)
-disp(12,13)
-update_disp()
-
-# initialise wifi status
-WifiStatus = []
-WifiStatus=[False]
-
-#second_thread = _thread.start_new_thread(Wifi.WifiConnect(),())
-
-WifiStatus = Wifi.WifiConnect()
-
-
-if WifiStatus[0] == True:
-    #print("in wifistatus loop main")
-    # let the outside world know that connected to internet - display "c" for connected
-    disp(19,15)
-    #time.sleep(10)
-    try:
-        ntptime.settime()
-        print("updating time from internet")
-        # update the ds3231 rtc
-        t = time.localtime()
-        #print(t)
-        ds.datetime((t[0],t[1],t[2],t[3],t[4],t[5],t[6]))
-    except:
-        print("no update from internet")
-        rtc.datetime(ds.datetime())        
-else: # network down - display "d"
-    # get the time from the DS3213
-    disp(18,15)
-    print("no wifi")
-    rtc.datetime(ds.datetime())
-        
-#print(ds.datetime())        
-
-
-
 # display "sensor"
 
 disp(17,8)
@@ -122,9 +88,16 @@ update_disp()
 
 # bring up the sensor
 bme = bme280.BME280(i2c=i2c0, address=0x76)
+#while True:
+#    print(bme.read_temperature())
+#    time.sleep(1)
+#bme = BME280(i2c=i2c0, address=0x76)
+#while True:
+#    print(bme.values)
+#    time.sleep(1)
 
-#print(bme.temperature(), bme.pressure(), bme.humidity())
 
+##################
 # display "booted"
 disp(13,8)
 disp(22,9)
@@ -152,14 +125,20 @@ while True:
             print("already updated")
             pass
         else:
-            try:
-                print("updating from internet in main loop as minutes are at:",t[4])
-                ntptime.settime()
-                # update the ds3231 with the updated time
-                t = time.localtime()
+            # display "net   "
+            disp(16,8)
+            disp(20,9)
+            disp(14,10)
+            disp(12,11)
+            disp(12,12)
+            disp(12,13)
+            update_disp()
+            
+            if Ntp_time.update_from_ntp() == True:
+                # update was received from internet, update the ds3231
                 ds.datetime((t[0],t[1],t[2],t[3],t[4],t[5],t[6]))
                 updated_at = t[4]
-            except:
+            else:
                 print("no update from internet")
 
     
