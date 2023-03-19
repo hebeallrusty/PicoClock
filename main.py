@@ -54,8 +54,20 @@ update_disp()
 ds = DS3231(i2c0, addr=0x68)
 #print(ds.datetime())
 
-# reset oscillator
-ds._OSF_reset()
+# check if time accurate
+if ds.OSF() == 1:
+    # display "batt  "
+    disp(13,8)
+    disp(23,9)
+    disp(14,10)
+    disp(14,11)
+    disp(12,12)
+    disp(12,13)
+    update_disp()
+    time.sleep(2)
+    
+    # reset flag
+    ds._OSF_reset()
 
 # set alarms on the ds3231 to trigger every second - to update display every second
 ds.alarm1((0), match = ds.AL1_EVERY_S)
@@ -107,7 +119,7 @@ disp(20,12)
 disp(18,13)
 update_disp()
 
-updated_at = 0
+updated_at = -1
 print("entering main loop")
 while True:
     
