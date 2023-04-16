@@ -120,7 +120,13 @@ def core1_run():
     print("Core 1 running")
     #global lock
     global t
+    global WifiStatus
+    global TimeUpdated
     #lock = True
+    WifiStatus = []
+    WifiStatus.append(False)
+    
+    TimeUpdated = False
     
     while True:
         
@@ -180,6 +186,19 @@ def core1_run():
             disp(dy[i],8+i)
             disp(mt[i],10+i)
             disp(yr[i+2],12+i)
+            
+        #print("WIFI STATUS",WifiStatus[0])
+        
+        
+        # by default the below statuses will be wiped each second due to the segment code omitting the dot; only need to check if true each time
+        # every 20 mins these status's should change when the Networking code runs
+        # add status of wifi
+        if WifiStatus[0] == True:
+            disp(27,5)
+        # add status of update
+        if TimeUpdated == True:
+            disp(27,13)
+        
         
         # updated the display once
         update_disp()
@@ -192,6 +211,8 @@ def update_from_ntp():
     #global lock
     global t
     global updated_at
+    global WifiStatus
+    global TimeUpdated
     #print("update_from_ntp triggered")
     
     # execute main thread on core 1 - wifi doesn't work correctly on core 0
@@ -216,7 +237,7 @@ def update_from_ntp():
                 print(WifiStatus)
                 
                 if WifiStatus[0] == True:
-                    disp(27,5) # put a dot at the end of the time to indicate it's been connected
+                    
                     try:
                         print("updating time from internet")            
                         ntptime.settime()
@@ -226,19 +247,20 @@ def update_from_ntp():
                         
                         # update the ds3231 module; rtc doesn't need updating as ntptime does that
                         ds.datetime((t[0],t[1],t[2],t[3],t[4],t[5],t[6]))
-                        disp(27,13)
+                        TimeUpdated = True
                         # record when the update occured so that we don't hammer the wifi or NTP server
                         updated_at = t[4]
                     except Exception as e:
-                        disp(28,13)
+                        TimeUpdated = False
+                        
                         # might error out - get the error number and print 
                         print(e)
                         print("no update on time")
       
                 else: # network down - display "d"
-                    disp(28,5) # remove wifi indicator
+                    TimeUpdated = False
                     print("no wifi")
-                    lock = False
+                    
             
         #print("Core 0 done")
         
