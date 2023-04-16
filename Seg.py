@@ -61,6 +61,16 @@ def glyph(g):
         return [(6,2,3,4),(0,1,5,7)]
     elif g == 23: # A
         return [(0,1,2,4,5,6),(3,7)]
+    elif g == 24: #U
+        return [(1,2,3,4,5),(0,6,7)]
+    elif g == 25: #F
+        return [(0,4,5,6),(1,2,3,7)]
+    elif g == 26: # L
+        return [(3,4,5),(0,1,2,6,7)]
+    elif g == 27: # add a .
+        return [(7,),()]
+    elif g == 28: # remove a .
+        return[(),(7,)]
     else: # return an E
         return [(0,5,6,4,3),(1,2,7)]
     

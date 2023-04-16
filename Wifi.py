@@ -1,14 +1,17 @@
 import SECRETS # custom script with wifi names and passwords
-import network
-from time import sleep # only need sleep here
+#import network
+from utime import sleep # only need sleep here
 
 # connect to network
 
-def WifiConnect():
+def WifiConnect(wlan):
+    print("Entering WifiConnect()")
     # create network object
-    wlan = network.WLAN(network.STA_IF)
+    #wlan = network.WLAN(network.STA_IF)
+    #print("defined wlan")
     # activate network card
-    wlan.active(True)
+    #wlan.active(True)
+    #print("wlan card switched on")
     
     if wlan.isconnected() == True:
         print("already connected")
@@ -16,7 +19,7 @@ def WifiConnect():
         return([wlan.isconnected()])
     else:
         for i in SECRETS.WIFI:
-            #print(i[0])
+            #print(i[0],i[1])
             wlan.connect(i[0],i[1])
             print("Attempting to connect to",i[0])
     
