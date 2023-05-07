@@ -4,6 +4,14 @@ from utime import sleep # only need sleep here
 
 # connect to network
 
+# constants that wifi status will output to move onto the next connection if there is a problem
+STAT_IDLE = 0 # no connection and no activity,
+STAT_CONNECTING = 1 # connecting in progress,
+STAT_WRONG_PASSWORD = -3 # failed due to incorrect password,
+STAT_NO_AP_FOUND = -2 #  failed because no access point replied,
+STAT_CONNECT_FAIL = -1 # failed due to other problems,
+STAT_GOT_IP = 3 # connection successful.
+
 def WifiConnect(wlan):
     print("Entering WifiConnect()")
     # create network object
@@ -29,9 +37,19 @@ def WifiConnect(wlan):
             while wlan.isconnected() == False:
                 # go into a loop whilst it isn't connected and give an update to term
                 print(j,": connecting to ", i[0])
-        
+                
+                
                 # sleep for 1 second
                 sleep(1)
+                
+                # check ongoing progress and break if there is a problem
+                print("wlan status:", wlan.status())
+                if wlan.status() == STAT_NO_AP_FOUND:
+                    break
+                elif wlan.status() == STAT_WRONG_PASSWORD:
+                    break
+                elif wlan.status() == STAT_CONNECT_FAIL:
+                    break
         
                 # increment counter
                 j = j +1

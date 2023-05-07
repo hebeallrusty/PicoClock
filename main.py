@@ -41,7 +41,8 @@ update_disp()
 
 # bring in the i2c0 line
 
-i2c0 = I2C(0,scl=Pin(5), sda=Pin(4))
+i2c0 = I2C(0,scl=Pin(5, pull=Pin.PULL_UP), sda=Pin(4,pull=Pin.PULL_UP))
+#i2c0 = I2C(0,scl=Pin(5), sda=Pin(4))
 
 
 # display "rtc   "
@@ -75,7 +76,7 @@ if ds.OSF() == 1:
 # set alarms on the ds3231 to trigger every second - to update display every second
 ds.alarm1((0), match = ds.AL1_EVERY_S)
 
-
+print("pass")
 
 # set up the rtc as the pico's clock; get the time from the ds3231 and then set var t as the local time for the loop
 #ds.datetime((29,10,16,2,9,45,11)) # for debug
@@ -83,6 +84,8 @@ rtc = machine.RTC()
 rtc.datetime(ds.datetime())
 t = time.localtime()
 
+print("t:",t)
+print("rtc:",ds.datetime())
 
 # display "sensor"
 
@@ -97,6 +100,13 @@ update_disp()
 # bring up the sensor
 bme = bme280.BME280(i2c=i2c0, address=0x76)
 
+disp(16,8)
+disp(20,9)
+disp(14,10)
+disp(12,11)
+disp(12,12)
+disp(12,13)
+update_disp()
 
 # activate wlan - wlan only works properly on Core0 not Core1 which freezes it
 wlan = network.WLAN(network.STA_IF)
@@ -115,6 +125,7 @@ update_disp()
 updated_at = -1
 #lock = False
 print("entering main loop")
+
 
 def core1_run():
     print("Core 1 running")
@@ -136,7 +147,7 @@ def core1_run():
         
         #update t as clock has ticked
         t = time.localtime()
-
+        #print("c1 rtc:",ds.datetime())
         
         # to display it, they need to be in a zero-padded list so that the digits can be iterated over
         bme_t = [int(x) for x in f"{int(round(bme.temperature(),0)):02d}"]
@@ -194,11 +205,17 @@ def core1_run():
         # every 20 mins these status's should change when the Networking code runs
         # add status of wifi
         if WifiStatus[0] == True:
-            disp(27,5)
+            disp(27,15)
         # add status of update
         if TimeUpdated == True:
-            disp(27,13)
-        
+            disp(27,7)
+            
+        # blink the dots every other second
+        if (tl[5] % 2) == 1:
+            disp(27,1)
+            disp(27,3)
+            disp(27,5)
+
         
         # updated the display once
         update_disp()
@@ -224,9 +241,10 @@ def update_from_ntp():
         #
         #print("Inside NTP Loop")
         #print(t)
-        
+        #time.sleep(1)
+        #print("ntp rtc:",ds.datetime())
         # check if time can be updated - every 20 mins
-        if t[4] == 0 or t[4] == 20 or t[4] == 40:
+        if t[4] == 0 or t[4] == 20 or t[4] == 40 or updated_at == -1:
             if t[4] == updated_at:
                 # already updated
                 pass
