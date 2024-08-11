@@ -3,11 +3,11 @@ from ht16k33matrixfeatherwing import HT16K33MatrixFeatherWing
 #from ht16k33 import HT16K33
 
 
-ht16k33_i2c = I2C(1,scl=Pin(3), sda=Pin(2))
+ht16k33_i2c = I2C(1,scl=Pin(15), sda=Pin(14))
 
 matrix = HT16K33MatrixFeatherWing(ht16k33_i2c)
 #HT16K33.set_brightness(brightness=1)
-matrix.set_brightness(15)
+matrix.set_brightness(3)
 
 def glyph(g):
     # return an tuple with the digits to set as on for the glyph it represents. Not to be called directly, but through a function. It won't explode, but it'll only default producing glyphs that'll work on the first cluster on a cathode, which can hold 2nr'
@@ -71,15 +71,23 @@ def glyph(g):
         return [(7,),()]
     elif g == 28: # remove a .
         return[(),(7,)]
+    elif g == 29: # g
+        return [(0,5,6,1,2,3),(4,7)]
+    elif g == 30: # p
+        return [(0,5,6,1,4),(2,3,7)]
     else: # return an E
         return [(0,5,6,4,3),(1,2,7)]
     
     
-def disp(d, bank):
+def disp(d, bank, gen=[(0,0,0,0,0,0,0,0),()]):
     # plot a digit and display it on the bank noted
+    # gen is for a generic custom glyph and d needs to be set at 99 for this to be activated. Allows for single / multiple LED operation
     
-    # get the glyphs and anti-glyphs for digit g
-    g,a = glyph(d)
+    if d != 99:
+        # get the glyphs and anti-glyphs for digit g
+        g,a = glyph(d)
+    else: # display a generic glyph defined in gen
+        g,a = gen
 
     #print(g,a)
     # glyphs to light

@@ -7,6 +7,7 @@ generic 7 segment displays found on eBay
 ht16k33 break-out
 DS3231 RTC module (for a Raspberry Pi)
 Raspberry Pi Pico
+Serial GPS Module
 
 
 Libraries used as follows but not included:
